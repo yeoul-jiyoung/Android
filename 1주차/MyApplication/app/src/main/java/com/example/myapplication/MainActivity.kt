@@ -1,66 +1,68 @@
 package com.example.myapplication
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import android.widget.ImageView
 import android.widget.TextView
-import android.graphics.Color
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import com.example.myapplication.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(R.layout.activity_main)
 
+        // ViewBinding 초기화
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        // 각 감정 클릭 이벤트 설정
         setEmotionClick(
-            imageViewId = R.id.iv_happy,
-            textViewId = R.id.tv_happymention,
+            imageView = binding.ivHappy,
+            textView = binding.tvHappymention,
             message = "행복을 선택했어요!",
-            highlightColor = Color.parseColor("yellow")
+            highlightColor = ContextCompat.getColor(this, R.color.happy_color)
         )
 
         setEmotionClick(
-            imageViewId = R.id.iv_good,
-            textViewId = R.id.tv_goodmention,
+            imageView = binding.ivGood,
+            textView = binding.tvGoodmention,
             message = "좋음을 선택했어요!",
-            highlightColor = Color.parseColor("blue")
+            highlightColor = ContextCompat.getColor(this, R.color.good_color)
         )
 
         setEmotionClick(
-            imageViewId = R.id.iv_soso,
-            textViewId = R.id.tv_sosomention,
+            imageView = binding.ivSoso,
+            textView = binding.tvSosomention,
             message = "평범한 하루를 선택했어요!",
-            highlightColor = Color.parseColor("purple")
+            highlightColor = ContextCompat.getColor(this, R.color.soso_color)
         )
 
         setEmotionClick(
-            imageViewId = R.id.iv_anxious,
-            textViewId = R.id.tv_anxiousmention,
+            imageView = binding.ivAnxious,
+            textView = binding.tvAnxiousmention,
             message = "불안을 선택했어요!",
-            highlightColor = Color.parseColor("green")
+            highlightColor = ContextCompat.getColor(this, R.color.anxious_color)
         )
 
         setEmotionClick(
-            imageViewId = R.id.iv_anger,
-            textViewId = R.id.tv_angermention,
+            imageView = binding.ivAnger,
+            textView = binding.tvAngermention,
             message = "화남을 선택했어요!",
-            highlightColor = Color.parseColor("red")
+            highlightColor = ContextCompat.getColor(this, R.color.anger_color)
         )
     }
 
+    // 클릭 이벤트 함수
     private fun setEmotionClick(
-        imageViewId: Int,
-        textViewId: Int,
+        imageView: ImageView,
+        textView: TextView,
         message: String,
         highlightColor: Int
     ) {
-        val imageView = findViewById<ImageView>(imageViewId)
-        val textView = findViewById<TextView>(textViewId)
-
         imageView.setOnClickListener {
             textView.setTextColor(highlightColor)
             Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
