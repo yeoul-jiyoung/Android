@@ -14,8 +14,8 @@ class MainActivity : AppCompatActivity() {
         binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val songTitle = binding.homeMiniPlayerSinger.text.toString()
-        val songSinger = binding.homeMiniPlayerTitle.toString()
+        val songTitle = binding.homeMiniPlayerTitle.toString()
+        val songSinger = binding.homeMiniPlayerSinger.text.toString()
 
         binding.homeMiniPlayer.setOnClickListener {
             val intent = Intent(this, SongActivity::class.java)
@@ -25,10 +25,14 @@ class MainActivity : AppCompatActivity() {
         }
         binding.homeMiniPlayerTitle.setOnClickListener {
             val intent = Intent(this, SongActivity::class.java)
+            intent.putExtra("title",songTitle)
+            intent.putExtra("singer",songSinger)
             startActivity(intent)
         }
         binding.homeMiniPlayerSinger.setOnClickListener {
             val intent = Intent(this, SongActivity::class.java)
+            intent.putExtra("title",songTitle)
+            intent.putExtra("singer",songSinger)
             startActivity(intent)
         }
     }

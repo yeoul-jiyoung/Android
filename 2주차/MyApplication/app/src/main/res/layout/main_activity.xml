@@ -15,7 +15,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <ImageView
             android:id="@+id/home_pannel_background_iv"
@@ -24,7 +24,6 @@
             android:scaleType="centerCrop"
             android:src="@drawable/img_first_album_default"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -162,35 +161,35 @@
             app:layout_constraintTop_toTopOf="@id/home_pannel_album_img_iv" />
 
         <TextView
-            android:id="@+id/home_today_music_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="오늘 발매 음악"
-            android:textColor="@color/black"
-            android:textStyle="bold"
-            android:textSize="16dp"
-            android:layout_marginStart="15dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/home_pannel_background_iv"
-            android:layout_marginTop="10dp"/>
+        android:id="@+id/home_today_music_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="오늘 발매 음악"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:layout_marginStart="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/home_pannel_background_iv"
+        android:layout_marginTop="10dp"/>
 
-        <ImageView
-            android:id="@+id/home_arrow_more_img_iv"
-            android:layout_width="22dp"
-            android:layout_height="22dp"
-            android:layout_marginStart="116dp"
-            android:layout_marginTop="-22dp"
-            android:src="@drawable/btn_main_arrow_more"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/home_today_music_title"
-            app:tint="@color/black"/>
+    <ImageView
+        android:id="@+id/home_arrow_more_img_iv"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="116dp"
+        android:layout_marginTop="-22dp"
+        android:src="@drawable/btn_main_arrow_more"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/home_today_music_title"
+        app:tint="@color/black"/>
 
         <ImageView
             android:id="@+id/home_today_music_iv"
             android:layout_width="120dp"
             android:layout_height="120dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="8dp"
             android:src="@drawable/img_album_exp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/home_today_music_title" />
@@ -261,14 +260,12 @@
 
     </LinearLayout>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/home_bottom_navigation"
+    <include
+        layout="@layout/bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottom_nav_menu"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

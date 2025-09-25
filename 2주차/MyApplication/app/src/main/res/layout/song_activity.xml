@@ -11,24 +11,22 @@
         android:layout_width="38dp"
         android:layout_height="38dp"
         android:src="@drawable/btn_player_setting"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.04"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.02" />
+        android:layout_marginTop="15dp" />
 
     <ImageView
         android:id="@+id/song_activity_arrow_down"
         android:layout_width="38dp"
         android:layout_height="38dp"
         android:src="@drawable/btn_main_arrow_more"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.95"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.02"
+        android:layout_marginTop="10dp"
         app:tint="@color/black"
         android:rotation="90"/>
 
@@ -37,12 +35,11 @@
         android:layout_width="38dp"
         android:layout_height="38dp"
         android:src="@drawable/btn_player_more"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.95"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.075"
+        android:layout_marginTop="45dp"
         app:tint="@color/black" />
 
 
@@ -73,11 +70,11 @@
         android:id="@+id/song_activity_next_to_singer"
         android:layout_width="22dp"
         android:layout_height="22dp"
-        android:layout_marginStart="265dp"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="133dp"
+        android:layout_marginStart="272dp"
+        android:layout_marginTop="156dp"
         android:src="@drawable/btn_main_arrow_more"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/black" />
 
     <ImageView
@@ -85,12 +82,11 @@
         android:layout_width="230dp"
         android:layout_height="230dp"
         android:src="@drawable/img_album_exp2"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.35" />
+        android:layout_marginTop="200dp"
+        />
 
 
     <TextView
@@ -121,21 +117,21 @@
         android:id="@+id/song_activity_like_img_iv"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        app:layout_constraintTop_toBottomOf="@id/song_activity_letter_2"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="150dp"
+        android:layout_marginStart="156dp"
+        android:layout_marginTop="8dp"
         android:src="@drawable/ic_my_like_off"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/song_activity_letter_2" />
 
     <ImageView
         android:id="@+id/song_activity_unlike_img_iv"
         android:layout_width="33dp"
         android:layout_height="33dp"
-        app:layout_constraintTop_toBottomOf="@id/song_activity_letter_2"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="150dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="152dp"
         android:src="@drawable/btn_player_unlike_off"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/song_activity_letter_2" />
 
     <ImageView
         android:id="@+id/song_activity_instagram_img_iv"
