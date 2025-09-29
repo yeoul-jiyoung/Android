@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="happy_color">#FFFF00</color>
+    <color name="good_color">#0000FF</color>
+    <color name="soso_color">#FF00FF</color>
+    <color name="anxious_color">#00FF00</color>
+    <color name="anger_color">#FF0000</color>
+</resources>
