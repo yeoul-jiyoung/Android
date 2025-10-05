@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.myapplication.databinding.AlbumFragmentBinding
+import com.google.android.material.tabs.TabLayoutMediator
 
 class AlbumFragment: Fragment() {
     lateinit var binding: AlbumFragmentBinding
@@ -22,6 +23,11 @@ class AlbumFragment: Fragment() {
 
         val albumAdapter= AlbumVPAdapter(fragment = this)
         binding.albumContentTp.adapter=albumAdapter
+
+        TabLayoutMediator(binding.albumContentTb, binding.albumContentTp) { tab, position ->
+            tab.text = information[position]
+        }.attach()
+
         return binding.root
     }
 }

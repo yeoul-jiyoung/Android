@@ -139,7 +139,7 @@
         android:layout_height="43dp"
         android:layout_marginBottom="7dp"
         android:src="@drawable/btn_actionbar_instagram"
-        app:layout_constraintBottom_toBottomOf="0"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginStart="7dp"
         />
@@ -161,7 +161,7 @@
         android:layout_height="43dp"
         android:layout_marginBottom="7dp"
         android:src="@drawable/btn_player_more"
-        app:layout_constraintBottom_toBottomOf="0"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="7dp"
         />
@@ -170,16 +170,16 @@
         android:id="@+id/song_progress"
         android:layout_width="match_parent"
         android:layout_height="4dp"
+        android:layout_marginBottom="284dp"
         android:max="100"
         android:progress="5"
         android:progressBackgroundTint="@color/gray"
         android:progressTint="@color/deepgray"
         android:thumb="@android:color/transparent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginBottom="180dp"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/song_start_time"

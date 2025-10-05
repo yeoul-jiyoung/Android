@@ -22,3 +22,4 @@ class PannelFragment : Fragment(){
         return binding.root
     }
 }
+

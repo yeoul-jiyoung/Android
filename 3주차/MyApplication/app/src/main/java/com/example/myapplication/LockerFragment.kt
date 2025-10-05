@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.example.myapplication.databinding.FragmentLockerBinding
+import com.google.android.material.tabs.TabLayoutMediator
 
 class LockerFragment : Fragment() {
     lateinit var binding: FragmentLockerBinding
@@ -23,6 +24,11 @@ class LockerFragment : Fragment() {
 
         val lockerAdapter = LockerVPAdapter(this)
         binding.lockerContentVp.adapter = lockerAdapter
+
+        TabLayoutMediator(binding.lockerContentTb, binding.lockerContentVp) { tab, position ->
+            tab.text = information[position]
+        }.attach()
+
         return binding.root
     }
 }

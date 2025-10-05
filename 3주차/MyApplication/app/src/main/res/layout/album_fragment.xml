@@ -95,16 +95,16 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="@id/song_locker_title_img_iv"
         app:layout_constraintStart_toStartOf="@id/song_locker_title_img_iv"
-        app:layout_constraintTop_toBottomOf="@id/song_locker_title_img_iv"/>
+        app:layout_constraintTop_toBottomOf="@id/song_locker_title_img_iv" />
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/albumContentTp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/home_mini_player_title"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/album_content_tb"/>
+        app:layout_constraintTop_toBottomOf="@+id/album_content_tb" />
 
     <LinearLayout
         android:id="@+id/home_mini_player_title"
