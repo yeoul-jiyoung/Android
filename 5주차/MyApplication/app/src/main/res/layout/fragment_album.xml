@@ -107,14 +107,6 @@
         app:layout_constraintTop_toBottomOf="@+id/album_content_tb"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/album_song_rv"
-            android:layout_width="match_parent"
-            android:layout_height="400dp"
-            android:clipToPadding="false"
-            android:paddingBottom="@dimen/space_for_bottom_bars"
-            tools:layout_editor_absoluteX="0dp"
-            app:layout_constraintTop_toBottomOf="@id/album_content_tb"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

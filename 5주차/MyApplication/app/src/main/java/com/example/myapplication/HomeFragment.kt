@@ -38,11 +38,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         albumRVAdapter.setMyItemClickListner(object : AlbumRVAdapter.MyItemClickListner{
             override fun onItemClick(album: Album) {
                 (context as MainActivity).supportFragmentManager.beginTransaction()
-                    .replace(R.id.main_container, AlbumFragment().apply {
-                        arguments= Bundle().apply {
-                            val gson= Gson()
+                    .replace(R.id.main_container, AlbumFragment().apply{
+                        arguments=Bundle().apply{
+                            val gson=Gson()
                             val albumJson=gson.toJson(album)
-                            putString("album",albumJson)
+                            putString("album",albumJson
+                            )
                         }
                     })
                     .commitAllowingStateLoss()

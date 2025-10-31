@@ -27,31 +27,13 @@ class AlbumFragment: Fragment() {
     ): View {
         _binding = FragmentAlbumBinding.inflate(inflater, container, false)
 
-        songDatas.apply {
-            add(Song("Lilac","IU"))
-            add(Song("Butter","방탄소년단(BTS)"))
-            add(Song("Next Level","에스파(AESPA)"))
-            add(Song("Boy with Luv","방탄소년단(BTS)"))
-            add(Song("BBoom BBoom","모모랜드(MONOLAND)"))
-            add(Song("Weekend","태연(Tea Yeon)"))
-            add(Song("Lilac","IU"))
-            add(Song("Butter","방탄소년단(BTS)"))
-            add(Song("Next Level","에스파(AESPA)"))
-            add(Song("Boy with Luv","방탄소년단(BTS)"))
-            add(Song("BBoom BBoom","모모랜드(MONOLAND)"))
-            add(Song("Weekend","태연(Tea Yeon)"))
-        }
-
-        val songRVAdapter= SongRVAdapter(songDatas)
-        binding.albumSongRv.adapter= songRVAdapter
-        binding.albumSongRv.layoutManager= LinearLayoutManager(context, LinearLayoutManager.VERTICAL,false)
-
         val albumJson=arguments?.getString("album")
         val album =gson.fromJson(albumJson,Album::class.java)
         setInit(album)
 
-        val albumAdapter = AlbumVPAdapter(this)
-        binding.albumContentVp.adapter = albumAdapter
+        //val albumAdapter = AlbumVPAdapter(this)
+
+        binding.albumContentVp.adapter = AlbumVPAdapter(this)
 
         TabLayoutMediator(binding.albumContentTb, binding.albumContentVp) {
         tab, position -> tab.text = information[position]

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+
     id("kotlin-kapt")
     id("kotlin-android")
 }
@@ -8,6 +9,10 @@ plugins {
 android {
     namespace = "com.example.myapplication"
     compileSdk = 36
+
+    viewBinding{
+        enable = true
+    }
 
     buildFeatures {
         viewBinding = true
@@ -47,10 +52,11 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
 
+
     //roomDB
-    implementation("androidx.room:room-runtime:2.3.0")
-    implementation("androidx.room:room-ktx:2.3.0")
-    kapt("androidx.room:room-compiler:2.3.0")
+    implementation("androidx.room:room-runtime:2.8.2")
+    implementation("androidx.room:room-ktx:2.8.2")
+    kapt("androidx.room:room-compiler:2.8.2")
 
 
     implementation("com.google.android.material:material:1.12.0")
@@ -58,12 +64,18 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
 
-
     implementation("androidx.fragment:fragment-ktx:1.8.2")
 
     implementation("androidx.viewpager2:viewpager2:1.1.0")
     implementation("com.google.code.gson:gson:2.10.1")
-    implementation(libs.androidx.room.compiler)
+    //implementation(libs.androidx.room.compiler)
+
+    implementation("androidx.core:core-ktx:1.17.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+
 
     implementation("androidx.core:core-splashscreen:1.0.1")
 

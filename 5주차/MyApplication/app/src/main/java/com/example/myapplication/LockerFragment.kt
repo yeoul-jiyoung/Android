@@ -22,24 +22,24 @@ class LockerFragment : Fragment() {
     ): View {
         _binding = FragmentLockerBinding.inflate(inflater, container, false)
 
-        SavedSongDatas.apply{
-            add(SavedSong(title="Butter", singer = "방탄소년단(BTS)", R.drawable.img_album_exp))
-            add(SavedSong(title = "Lilac","아이유(IU)",R.drawable.img_album_exp2))
-            add(SavedSong("Next Level","에스파(AESPA)",R.drawable.img_album_exp3))
-            add(SavedSong("Boy with Luv","방탄소년단(BTS)",R.drawable.img_album_exp4))
-            add(SavedSong("BBoom BBoom","모모랜드(MOMOLAND",R.drawable.img_album_exp5))
-            add(SavedSong("Weekend","태연(Tea Yeon)",R.drawable.img_album_exp6))
-            add(SavedSong(title="Butter", singer = "방탄소년단(BTS)", R.drawable.img_album_exp))
-            add(SavedSong(title = "Lilac","아이유(IU)",R.drawable.img_album_exp2))
-            add(SavedSong("Next Level","에스파(AESPA)",R.drawable.img_album_exp3))
-            add(SavedSong("Boy with Luv","방탄소년단(BTS)",R.drawable.img_album_exp4))
-            add(SavedSong("BBoom BBoom","모모랜드(MOMOLAND",R.drawable.img_album_exp5))
-            add(SavedSong("Weekend","태연(Tea Yeon)",R.drawable.img_album_exp6))
-        }
+//        SavedSongDatas.apply{
+//            add(SavedSong(title="Butter", singer = "방탄소년단(BTS)", R.drawable.img_album_exp))
+//            add(SavedSong(title = "Lilac","아이유(IU)",R.drawable.img_album_exp2))
+//            add(SavedSong("Next Level","에스파(AESPA)",R.drawable.img_album_exp3))
+//            add(SavedSong("Boy with Luv","방탄소년단(BTS)",R.drawable.img_album_exp4))
+//            add(SavedSong("BBoom BBoom","모모랜드(MOMOLAND",R.drawable.img_album_exp5))
+//            add(SavedSong("Weekend","태연(Tea Yeon)",R.drawable.img_album_exp6))
+//            add(SavedSong(title="Butter", singer = "방탄소년단(BTS)", R.drawable.img_album_exp))
+//            add(SavedSong(title = "Lilac","아이유(IU)",R.drawable.img_album_exp2))
+//            add(SavedSong("Next Level","에스파(AESPA)",R.drawable.img_album_exp3))
+//            add(SavedSong("Boy with Luv","방탄소년단(BTS)",R.drawable.img_album_exp4))
+//            add(SavedSong("BBoom BBoom","모모랜드(MOMOLAND",R.drawable.img_album_exp5))
+//            add(SavedSong("Weekend","태연(Tea Yeon)",R.drawable.img_album_exp6))
+//        }
 
-        val lockerRVAdapter= LockerRVAdapter(SavedSongDatas)
-        binding.lockerSongRv.adapter=lockerRVAdapter
-        binding.lockerSongRv.layoutManager= LinearLayoutManager(context, LinearLayoutManager.VERTICAL,false)
+//        val lockerRVAdapter= LockerRVAdapter(SavedSongDatas)
+//        binding.lockerSongRv.adapter=lockerRVAdapter
+//        binding.lockerSongRv.layoutManager= LinearLayoutManager(context, LinearLayoutManager.VERTICAL,false)
 
         
 

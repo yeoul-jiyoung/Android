@@ -13,8 +13,8 @@
         android:src="@drawable/btn_playlist_select_off"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="160dp"/>
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="150dp"/>
 
     <TextView
         android:id="@+id/locker_select_all_tv"
@@ -49,7 +49,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="65dp"
+        android:layout_marginEnd="30dp"
         android:text="편집"
         android:textColor="@color/black"
         android:textStyle="bold"
@@ -57,14 +57,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/locker_select_all_img_iv" />
 
-<!--    <androidx.recyclerview.widget.RecyclerView-->
-<!--        android:id="@+id/locker_savedSong_recyclerView"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"-->
-<!--        android:orientation="vertical"-->
-<!--        android:overScrollMode="never"-->
-<!--        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"-->
-<!--        tools:listitem="@layout/fragment_song" />-->
-
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/locker_savedSong_recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="5dp"
+        android:orientation="vertical"
+        android:overScrollMode="never"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/locker_select_all_img_iv"
+        app:layout_constraintVertical_bias="0.0"
+        tools:listitem="@layout/fragment_locker_tracks" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

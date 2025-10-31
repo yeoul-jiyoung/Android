@@ -4,7 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.myapplication.databinding.MainActivityBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
@@ -13,20 +16,20 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: MainActivityBinding
     private var song:Song = Song()
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
         binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         inputDummySongs(applicationContext)
 
         binding.homeMiniPlayerContent.setOnClickListener {
-            val editor=getSharedPreferences("song",MODE_PRIVATE).edit()
-            editor.putInt("songId",song.id)
-            editor.apply()
+            startActivity(Intent(this, SongActivity::class.java))
 
-            val intent= Intent(this, SongActivity::class.java)
-            startActivity(intent)
         }
+        setupBottomNavigation()
 
         fun openSong() {
             val title = binding.homeMiniPlayerTitle.text.toString()
@@ -43,10 +46,11 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.main_container, HomeFragment())
             .commitAllowingStateLoss()
-        setupBottomNavigation()
+
         findViewById<BottomNavigationView>(R.id.home_bottom_navigation)
             .selectedItemId = R.id.menu_home
     }
+
     override fun onStart() {
         super.onStart()
 
@@ -139,7 +143,7 @@ private fun inputDummySongs(context: Context){
             190,
             false,
             "music_butter",
-            R.drawable.img_album_exp,
+            R.drawable.img_album_exp3,
             false,
         )
     )
@@ -152,7 +156,7 @@ private fun inputDummySongs(context: Context){
             210,
             false,
             "music_next",
-            R.drawable.img_album_exp3,
+            R.drawable.img_album_exp4,
             false,
         )
     )
@@ -161,12 +165,12 @@ private fun inputDummySongs(context: Context){
     songDB.songDao().insert(
         Song(
             "Boy with Luv",
-            "music_boy",
+            "방탄소년단 (BTS)",
             0,
             230,
             false,
-            "music_lilac",
-            R.drawable.img_album_exp4,
+            "music_boy",
+            R.drawable.img_album_exp5,
             false,
         )
     )

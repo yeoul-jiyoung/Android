@@ -12,7 +12,7 @@ class LockerAlbumRVAdapter(private val albumList:ArrayList<LockerAlbum>): Recycl
     }
 
     override fun onBindViewHolder(holder: LockerAlbumRVAdapter.ViewHolder, position: Int) {
-
+        holder.bind(albumList[position])
     }
 
     override fun getItemCount(): Int = albumList.size
