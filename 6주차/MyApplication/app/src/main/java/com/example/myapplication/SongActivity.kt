@@ -6,8 +6,13 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.databinding.SongActivityBinding
 import com.google.gson.Gson
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 class SongActivity : AppCompatActivity() {
 
@@ -31,8 +36,8 @@ class SongActivity : AppCompatActivity() {
         initClickListener()
     }
 
-    override fun onPause() {
-        super.onPause()
+    override fun onStop() {
+        super.onStop()
         if (songs.isEmpty()) return
 
         // 현재 위치/상태 저장
@@ -50,6 +55,7 @@ class SongActivity : AppCompatActivity() {
             .putInt("songId", songs[nowPos].id)
             .apply()
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
@@ -70,7 +76,6 @@ class SongActivity : AppCompatActivity() {
         val playing = songs.getOrNull(nowPos)?.isPlaying ?: false
         PlaybackStore.save(this, PlaybackState(id, pos, playing))
     }
-
 
     private fun initClickListener() {
         binding.songActivityArrowDown.setOnClickListener { finish() }
@@ -110,7 +115,7 @@ class SongActivity : AppCompatActivity() {
         }
 
         setPlayer(songs[nowPos])
-        startTimer()   // 기존 타이머/코루틴 시작 위치 유지
+        startTimer()
     }
 
     private fun moveSong(direct: Int) {
@@ -144,12 +149,12 @@ class SongActivity : AppCompatActivity() {
         binding.songStartTime.text = formatSec(song.second)
         binding.songEndTime.text = formatSec(song.playTime)
 
-        // 초기 퍼센트(0~100), 0 나눔 방지
+        // 초기 퍼센트(0~100)
         val playTime = song.playTime
         val percent = if (playTime > 0) ((song.second.toFloat() / playTime) * 100).toInt() else 0
         binding.songProgress.progress = percent.coerceIn(0, 100)
 
-        // 오디오 리소스 안전 가드
+        // 오디오 리소스
         val music = resources.getIdentifier(song.music, "raw", packageName)
         if (music == 0) {
             Toast.makeText(this, "오디오 리소스를 찾을 수 없습니다: ${song.music}", Toast.LENGTH_SHORT).show()
@@ -173,7 +178,7 @@ class SongActivity : AppCompatActivity() {
             if (song.isLike) R.drawable.ic_my_like_on else R.drawable.ic_my_like_off
         )
 
-        // 기본은 멈춘 상태
+        // 기본은 저장된 상태대로
         setPlayerStatus(song.isPlaying)
     }
 
@@ -197,14 +202,14 @@ class SongActivity : AppCompatActivity() {
                 val sec = mp.currentPosition / 1000
                 binding.songStartTime.text = formatSec(sec)
                 if (songs.isNotEmpty()) songs[nowPos].second = sec
-                mediaPlayer?.pause()
+                // 중복 pause 제거 (한 번만 호출)
                 savePlayback()
             }
         }
     }
 
     private fun startTimer() {
-        timer?.interrupt() // 기존 쓰레드 정리
+        timer?.interrupt()
         timer = Timer(
             playTime = songs[nowPos].playTime,
             startSecond = songs[nowPos].second,
@@ -218,38 +223,43 @@ class SongActivity : AppCompatActivity() {
         return String.format("%02d:%02d", m, s)
     }
 
-    //재생 진행률/시간 UI를 갱신하는 타이머
+    // Coroutine 으로 코드 변경
     inner class Timer(
         private val playTime: Int,
         startSecond: Int = 0,
         @Volatile var isPlaying: Boolean = true
-    ) : Thread() {
-
+    ) {
         private var second: Int = startSecond.coerceAtLeast(0)
-        private var mills: Int = 0 // ms 누적
+        private var mills: Int = 0            // ms 누적
+        private var saveTick: Int = 0         // 0.5초 저장 간격 누적
+        private var job: Job? = null
 
-        override fun run() {
-            try {
+        fun start() {
+            // 코루틴 시작
+            job = lifecycleScope.launch {
                 if (playTime <= 0) {
-                    runOnUiThread {
-                        binding.songProgress.progress = 0
-                        binding.songStartTime.text = "00:00"
-                    }
-                    return
+                    // UI 초기화
+                    binding.songProgress.progress = 0
+                    binding.songStartTime.text = "00:00"
+                    return@launch
                 }
 
-                while (!isInterrupted) {
-
-                    var saveTick=0
+                while (isActive) {
+                    // 화면이 보이지 않는 상태면 가볍게 대기
+                    if (!lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.STARTED)) {
+                        delay(80)
+                        continue
+                    }
 
                     if (second >= playTime) break
 
                     if (isPlaying) {
-                        sleep(50)
+                        delay(50)
                         mills += 50
 
+                        // 0.5초마다 저장
                         saveTick += 50
-                        if (saveTick >= 500) {   // ✅ 0.5초마다 저장
+                        if (saveTick >= 500) {
                             saveTick = 0
                             savePlayback()
                         }
@@ -259,27 +269,25 @@ class SongActivity : AppCompatActivity() {
                         val totalMs = playTime * 1000
                         val percent = ((elapsedMs.toFloat() / totalMs) * 100).toInt().coerceIn(0, 100)
 
-                        runOnUiThread {
-                            binding.songProgress.progress = percent
-                        }
+                        // UI 갱신
+                        binding.songProgress.progress = percent
 
                         if (mills >= 1000) {
                             mills -= 1000
                             second++
-                            runOnUiThread {
-                                binding.songStartTime.text = formatSec(second)
-                            }
+                            binding.songStartTime.text = formatSec(second)
                         }
                     } else {
                         // 멈춤 상태에서는 과도한 busy-loop 방지
-                        sleep(80)
+                        delay(80)
                     }
                 }
-            } catch (e: InterruptedException) {
-                // 정상 종료
-            } catch (t: Throwable) {
-                Log.e("Song", "Timer error", t)
             }
+        }
+
+        fun interrupt() {
+            job?.cancel()
+            job = null
         }
     }
 }
