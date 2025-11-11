@@ -8,6 +8,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.databinding.SongActivityBinding
+import com.google.firebase.Firebase
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.database
 import com.google.gson.Gson
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -22,7 +25,13 @@ class SongActivity : AppCompatActivity() {
     private val gson: Gson = Gson()
 
     private val songs = arrayListOf<Song>()
-    private lateinit var songDB: SongDatabase
+
+    //DB 주석
+    //private lateinit var songDB: SongDatabase
+
+    private val database= Firebase.database //Firebase 인스턴스
+    private val songRef=database.getReference("songs") //songs 경로 참조
+
     private var timer: Timer? = null
     private var nowPos = 0
 
@@ -31,9 +40,20 @@ class SongActivity : AppCompatActivity() {
         binding = SongActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        //로딩 상태: 재생 버튼 등 잠시 비활성화
+        setControlsEnabled(false)
+
         initPlayList()
-        initSong()
+        //initSong()
         initClickListener()
+    }
+
+    private fun setControlsEnabled(enabled: Boolean) {
+        binding.songActivityPlayPlayerImgIv.isEnabled = enabled
+        binding.songActivityPausePlayerImgIv.isEnabled = enabled
+        binding.songActivityNextPlayerImgIv.isEnabled = enabled
+        binding.songActivityPreviousPlayerImgIv.isEnabled = enabled
+        binding.songActivityLikeImgIv.isEnabled = enabled
     }
 
     override fun onStop() {
@@ -50,9 +70,13 @@ class SongActivity : AppCompatActivity() {
         songs[nowPos].isPlaying = false
         setPlayerStatus(false)
 
+        // 다른 화면(미니플레이어, 앨범 프래그먼트)과 데이터 동기화를 위해 현재 곡의 전체 정보를 JSON으로 저장
+        val songJson = gson.toJson(songs[nowPos])
+
         getSharedPreferences("song", MODE_PRIVATE)
             .edit()
-            .putInt("songId", songs[nowPos].id)
+            .putInt("songId", songs[nowPos].id) // 기존 로직 유지를 위해 id도 저장
+            .putString("song_json", songJson)   // 곡 전체 정보를 JSON으로 저장
             .apply()
     }
 
@@ -65,9 +89,38 @@ class SongActivity : AppCompatActivity() {
     }
 
     private fun initPlayList() {
-        songDB = SongDatabase.getInstance(this)!!
-        songs.clear()
-        songs.addAll(songDB.songDao().getSongs())
+        //songDB = SongDatabase.getInstance(this)!!
+        //songs.clear()
+        //songs.addAll(songDB.songDao().getSongs())
+
+        //Firebase에서 데이터 가져오기
+        songRef.get().addOnSuccessListener { dataSnapshot ->
+            // 임시 리스트에 Firebase에서 가져온 데이터를 담습니다.
+            val songListFromFirebase = mutableListOf<Song>()
+            for (snapshot in dataSnapshot.children) {
+                snapshot.getValue(Song::class.java)?.let { song ->
+                    snapshot.key?.toIntOrNull()?.let { song.id = it }
+                    songListFromFirebase.add(song)
+                }
+            }
+
+            songs.clear()
+            // 가져온 리스트를 song.id 기준으로 오름차순 정렬하여 songs 리스트에 추가합니다.
+            songs.addAll(songListFromFirebase.sortedBy { it.id })
+
+            if (songs.isEmpty()) {
+                Toast.makeText(this, "서버에서 곡을 찾지 못했습니다.", Toast.LENGTH_SHORT).show()
+                return@addOnSuccessListener
+            }
+
+            setControlsEnabled(true)
+            initSong()
+        }
+            .addOnFailureListener { e ->
+                Log.e("SongActivity", "Firebase 로딩 실패", e)
+                Toast.makeText(this, "네트워크 오류로 곡을 불러오지 못했습니다.", Toast.LENGTH_SHORT).show()
+                setControlsEnabled(false)
+            }
     }
 
     private fun savePlayback() {
@@ -87,14 +140,15 @@ class SongActivity : AppCompatActivity() {
         binding.songActivityPreviousPlayerImgIv.setOnClickListener { moveSong(-1) }
 
         binding.songActivityLikeImgIv.setOnClickListener {
-            setLike(songs[nowPos].isLike)
+            //setLike(songs[nowPos].isLike)
+            setLike()
         }
     }
 
     private fun initSong() {
         if (songs.isEmpty()) {
             Toast.makeText(this, "재생할 노래가 없습니다.", Toast.LENGTH_SHORT).show()
-            finish()
+            //finish()
             return
         }
 
@@ -112,17 +166,49 @@ class SongActivity : AppCompatActivity() {
         startTimer()
     }
 
-    private fun setLike(isLike: Boolean){
-        songs[nowPos].isLike=!isLike
-        songDB.songDao().updateIsLikeById(!isLike,songs[nowPos].id)
+//    //DB의 setLike
+//    private fun setLike(isLike: Boolean){
+//        songs[nowPos].isLike=!isLike
+//        songDB.songDao().updateIsLikeById(!isLike,songs[nowPos].id)
+//
+//        if(!isLike){
+//            binding.songActivityLikeImgIv.setImageResource(R.drawable.ic_my_like_on)
+//        }else{
+//            binding.songActivityLikeImgIv.setImageResource(R.drawable.ic_my_like_off)
+//        }
+//    }
 
-        if(!isLike){
-            binding.songActivityLikeImgIv.setImageResource(R.drawable.ic_my_like_on)
-        }else{
-            binding.songActivityLikeImgIv.setImageResource(R.drawable.ic_my_like_off)
-        }
+    //Firebase의 setLike
+    private fun setLike() {
+        val currentSong = songs[nowPos]
+        val newIsLike = !currentSong.isLike
+
+        // 1. UI와 메모리 데이터 즉시 업데이트 (낙관적 UI 업데이트)
+        currentSong.isLike = newIsLike
+        binding.songActivityLikeImgIv.setImageResource(
+            if (newIsLike) R.drawable.ic_my_like_on
+            else R.drawable.ic_my_like_off
+        )
+
+        // 2. Firebase에 데이터 저장 요청
+        songRef.child(currentSong.id.toString()).child("isLike").setValue(newIsLike)
+            .addOnFailureListener { e ->
+                // 3. Firebase 저장 실패 시 롤백
+                Log.e("Firebase", "좋아요 상태 저장 실패", e)
+                Toast.makeText(this, "네트워크 오류로 좋아요 상태를 저장하지 못했습니다.", Toast.LENGTH_SHORT).show()
+
+                // 메모리 데이터 롤백
+                currentSong.isLike = !newIsLike
+
+                // UI 롤백 (현재 보고 있는 곡이 롤백 대상 곡일 경우에만)
+                if (nowPos == getPlayingSongPosition(currentSong.id)) {
+                    binding.songActivityLikeImgIv.setImageResource(
+                        if (!newIsLike) R.drawable.ic_my_like_on
+                        else R.drawable.ic_my_like_off
+                    )
+                }
+            }
     }
-
 
 
     private fun moveSong(direct: Int) {
@@ -150,7 +236,11 @@ class SongActivity : AppCompatActivity() {
         // 타이틀/가수/커버
         binding.songActivityTitle.text = song.title
         binding.songActivitySinger.text = song.singer
-        song.coverImg?.let { binding.songActivityTitleImgIv.setImageResource(it) }
+        // 앨범커버: 리소스 "이름"으로 로드
+        val resId = song.coverImg ?: 0
+        binding.songActivityTitleImgIv.setImageResource(
+            if (resId != 0) resId else R.drawable.img_album_exp2
+        )
 
         // 시작/끝 시간
         binding.songStartTime.text = String.format("%02d:%02d",song.second/60,song.second%60)
@@ -159,7 +249,8 @@ class SongActivity : AppCompatActivity() {
         // 초기 퍼센트(0~100)
         val playTime = song.playTime
         val percent = if (playTime > 0) ((song.second.toFloat() / playTime) * 100).toInt() else 0
-        binding.songProgress.progress = (song.second*1000/song.playTime)
+        //binding.songProgress.progress = (song.second*1000/song.playTime)
+        binding.songProgress.progress = percent.coerceIn(0, 100)
 
         // 오디오 리소스
         val music = resources.getIdentifier(song.music, "raw", packageName)
@@ -180,15 +271,11 @@ class SongActivity : AppCompatActivity() {
             }
         }
 
-        // 좋아요 아이콘
-//        binding.songActivityLikeImgIv.setImageResource(
-//            if (song.isLike) R.drawable.ic_my_like_on else R.drawable.ic_my_like_off
-//        )
-        if(song.isLike){
-            binding.songActivityLikeImgIv.setImageResource(R.drawable.ic_my_like_on)
-        }else{
-            binding.songActivityLikeImgIv.setImageResource(R.drawable.ic_my_like_off)
-        }
+        // 좋아요 아이콘 상태를 현재 곡의 isLike 값에 맞춰 설정
+        binding.songActivityLikeImgIv.setImageResource(
+            if (song.isLike) R.drawable.ic_my_like_on
+            else R.drawable.ic_my_like_off
+        )
 
 
         // 기본은 저장된 상태대로

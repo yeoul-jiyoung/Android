@@ -4,6 +4,8 @@ plugins {
 
     id("kotlin-kapt")
     id("kotlin-android")
+    alias(libs.plugins.google.gms.google.services)
+    //id("com.google.gms.google-services")
 }
 
 android {
@@ -77,6 +79,11 @@ dependencies {
 
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+
+    //Firebase Realtime Database 의존성 추가
+    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation("com.google.firebase:firebase-database-ktx")
+    implementation(libs.firebase.database)
 
 
     implementation("androidx.core:core-splashscreen:1.0.1")

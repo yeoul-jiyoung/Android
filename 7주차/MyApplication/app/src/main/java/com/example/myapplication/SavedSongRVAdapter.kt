@@ -9,6 +9,8 @@ import com.example.myapplication.databinding.ItemSongBinding
 class SavedSongRVAdapter() :
     RecyclerView.Adapter<SavedSongRVAdapter.ViewHolder>() {
     private val songs = ArrayList<Song>()
+
+    //more 이미지 클릭 시 삭제
     interface MyItemClickListener{
         fun onRemoveSong(songId: Int)
     }
@@ -28,8 +30,11 @@ class SavedSongRVAdapter() :
     override fun onBindViewHolder(holder: SavedSongRVAdapter.ViewHolder, position: Int) {
         holder.bind(songs[position])
         holder.binding.itemSongMoreIv.setOnClickListener {
+
+            //아이템이 눌렸을 때 해당 리스너가 동작
             mItemClickListener.onRemoveSong(songs[position].id)
             removeSong(position)
+
         }
     }
 

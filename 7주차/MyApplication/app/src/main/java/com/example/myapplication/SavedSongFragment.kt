@@ -11,9 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myapplication.databinding.FragmentLockerSavedsongBinding
 
 class SavedSongFragment : Fragment() {
-    private var _binding: FragmentLockerSavedsongBinding?=null
+    private var _binding: FragmentLockerSavedsongBinding? = null
     private val binding get()=_binding!!
     private val songs = arrayListOf<SavedSong>()
+    //private lateinit var songDB: SongDatabase
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -64,6 +66,16 @@ class SavedSongFragment : Fragment() {
         binding.lockerSavedSongRecyclerView.layoutManager= LinearLayoutManager(context,
             LinearLayoutManager.VERTICAL,false)
 
-        //val songRVAdapter=Sa
+        val songRVAdapter= SavedSongRVAdapter()
+
+        songRVAdapter.setMyItemClickListener(object : SavedSongRVAdapter.MyItemClickListener{
+            override fun onRemoveSong(songId: Int) {
+                //songDB.songDao().updateIsLikeById(false,songId)
+            }
+        })
+
+        binding.lockerSavedSongRecyclerView.adapter=songRVAdapter
+        //songRVAdapter.addSongs(songDB.songDao().getLikedSongs(true)as ArrayList<Song>)
+
     }
 }
