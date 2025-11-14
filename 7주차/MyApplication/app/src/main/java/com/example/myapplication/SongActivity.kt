@@ -41,7 +41,7 @@ class SongActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         //로딩 상태: 재생 버튼 등 잠시 비활성화
-        setControlsEnabled(false)
+        setControlsEnabled(true)
 
         initPlayList()
         //initSong()
@@ -95,7 +95,7 @@ class SongActivity : AppCompatActivity() {
 
         //Firebase에서 데이터 가져오기
         songRef.get().addOnSuccessListener { dataSnapshot ->
-            // 임시 리스트에 Firebase에서 가져온 데이터를 담습니다.
+            // 임시 리스트에 Firebase에서 가져온 데이터 담기
             val songListFromFirebase = mutableListOf<Song>()
             for (snapshot in dataSnapshot.children) {
                 snapshot.getValue(Song::class.java)?.let { song ->
@@ -105,7 +105,7 @@ class SongActivity : AppCompatActivity() {
             }
 
             songs.clear()
-            // 가져온 리스트를 song.id 기준으로 오름차순 정렬하여 songs 리스트에 추가합니다.
+            // 가져온 리스트를 song.id 기준으로 오름차순 정렬하여 songs 리스트에 추가
             songs.addAll(songListFromFirebase.sortedBy { it.id })
 
             if (songs.isEmpty()) {
@@ -124,11 +124,16 @@ class SongActivity : AppCompatActivity() {
     }
 
     private fun savePlayback() {
-        val id = if (songs.isNotEmpty()) songs[nowPos].id else 0
-        val pos = mediaPlayer?.currentPosition ?: 0
-        val playing = songs.getOrNull(nowPos)?.isPlaying ?: false
-        PlaybackStore.save(this, PlaybackState(id, pos, playing))
+        if (songs.isEmpty()) return
+
+        val cur = songs[nowPos]
+        val id = cur.id
+        val posMs = cur.second * 1000           // 초 → ms
+        val playing = cur.isPlaying
+
+        PlaybackStore.save(this, PlaybackState(id, posMs, playing))
     }
+
 
     private fun initClickListener() {
         binding.songActivityArrowDown.setOnClickListener { finish() }
@@ -155,6 +160,7 @@ class SongActivity : AppCompatActivity() {
         val spf = getSharedPreferences("song", MODE_PRIVATE)
         val songId = spf.getInt("songId", 0)
         nowPos = getPlayingSongPosition(songId).coerceIn(0, songs.lastIndex)
+
 
         PlaybackStore.read(this)?.let { st ->
             if (st.songId != 0) nowPos = getPlayingSongPosition(st.songId)
@@ -216,11 +222,20 @@ class SongActivity : AppCompatActivity() {
             Toast.makeText(this, if (direct < 0) "first song" else "last song", Toast.LENGTH_SHORT).show()
             return
         }
+
+        //현재 곡이 재생 중인지 기억
+        val wasPlaying=songs.getOrNull(nowPos)?.isPlaying?:false
+
         nowPos += direct
 
+        //기존 타이머 정리
         timer?.interrupt()
         mediaPlayer?.release()
         mediaPlayer = null
+
+        //새 곡에도 이전 재생 상태를 그대로 전달
+        //songs[nowPos].second=0
+        songs[nowPos].isPlaying=wasPlaying
 
         setPlayer(songs[nowPos])
         startTimer()
@@ -253,30 +268,29 @@ class SongActivity : AppCompatActivity() {
         binding.songProgress.progress = percent.coerceIn(0, 100)
 
         // 오디오 리소스
-        val music = resources.getIdentifier(song.music, "raw", packageName)
-        if (music == 0) {
-            Toast.makeText(this, "오디오 리소스를 찾을 수 없습니다: ${song.music}", Toast.LENGTH_SHORT).show()
-            mediaPlayer?.release(); mediaPlayer = null
-            setPlayerStatus(isPlaying = true)
-            return
-        }
-
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer.create(this, music)?.apply {
-            // 저장된 위치로 시킹
-            seekTo((song.second).coerceAtLeast(0) * 1000)
-            setOnCompletionListener {
-                setPlayerStatus(isPlaying=true)
-                moveSong(+1)
-            }
-        }
+//        val music = resources.getIdentifier(song.music, "raw", packageName)
+//        if (music == 0) {
+//            Toast.makeText(this, "오디오 리소스를 찾을 수 없습니다: ${song.music}", Toast.LENGTH_SHORT).show()
+//            mediaPlayer?.release(); mediaPlayer = null
+//            setPlayerStatus(isPlaying = true)
+//            return
+//        }
+//
+//        mediaPlayer?.release()
+//        mediaPlayer = MediaPlayer.create(this, music)?.apply {
+//            // 저장된 위치로 시킹
+//            seekTo((song.second).coerceAtLeast(0) * 1000)
+//            setOnCompletionListener {
+//                setPlayerStatus(isPlaying=true)
+//                moveSong(+1)
+//            }
+//        }
 
         // 좋아요 아이콘 상태를 현재 곡의 isLike 값에 맞춰 설정
         binding.songActivityLikeImgIv.setImageResource(
             if (song.isLike) R.drawable.ic_my_like_on
             else R.drawable.ic_my_like_off
         )
-
 
         // 기본은 저장된 상태대로
         setPlayerStatus(song.isPlaying)
@@ -351,7 +365,20 @@ class SongActivity : AppCompatActivity() {
                         continue
                     }
 
-                    if (second >= playTime) break
+                    if (second >= playTime) {
+                        if (songs.isNotEmpty()) {
+                            // 마지막 곡이 아니면 다음 곡으로
+                            if (nowPos < songs.lastIndex) {
+                                // 현재 재생 상태 유지한 채 다음 곡으로 이동
+                                moveSong(+1)
+                            } else {
+                                // 마지막 곡이면 정지
+                                setPlayerStatus(false)
+                            }
+                        }
+                        // 현재 타이머 코루틴은 종료 (moveSong 안에서 새 Timer 시작됨)
+                        return@launch
+                    }
 
                     if (isPlaying) {
                         delay(50)
@@ -375,6 +402,11 @@ class SongActivity : AppCompatActivity() {
                         if (mills >= 1000) {
                             mills -= 1000
                             second++
+
+                            //Song 객체에도 초 단위 위치를 저장해서 공유
+                            if (songs.isNotEmpty()) {
+                                songs[nowPos].second = second
+                            }
                             binding.songStartTime.text = formatSec(second)
                         }
                     } else {

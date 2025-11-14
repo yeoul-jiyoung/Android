@@ -56,7 +56,6 @@ class MainActivity : AppCompatActivity() {
 
         // 미니플레이어 → SongActivity로 진입
         binding.homeMiniPlayerContent.setOnClickListener { openSongActivity() }
-        binding.homeMiniPlayer.setOnClickListener { openSongActivity() }
         binding.homeMiniPlayerTitle.setOnClickListener { openSongActivity() }
         binding.homeMiniPlayerSinger.setOnClickListener { openSongActivity() }
 
@@ -82,12 +81,18 @@ class MainActivity : AppCompatActivity() {
                     songs.add(song)
                 }
             }
+            Log.d("MainActivity", "Firebase loaded, songs.size=${songs.size}")
+            songs.forEach {
+                Log.d("MainActivity", "song id=${it.id}, title=${it.title}, singer=${it.singer}")
+            }
 
             // 데이터 로딩이 완료된 후, UI 초기화 작업
             // onStart의 로직을 그대로 가져오는 함수
             setupMiniPlayerOnStart()
 
         }.addOnFailureListener {
+                e ->
+            Log.e("MainActivity", "Firebase load failed", e)
             // 데이터 로딩 실패 시 처리 토스트 메세지 출력
             Toast.makeText(this, "데이터 로딩에 실패했습니다.", Toast.LENGTH_SHORT).show()
         }
@@ -97,16 +102,44 @@ class MainActivity : AppCompatActivity() {
     // onStart의 로직을 새 함수로 분리
     private fun setupMiniPlayerOnStart() {
         // onStart에 있던 코드를 그대로 여기로 옮김
-        if (songs.isEmpty()) return
+        //if (songs.isEmpty()) return
 
+        // SongActivity에서 저장해 둔 song_json(현재 곡 전체 정보) 기준으로 복원
+        val spf = getSharedPreferences("song", MODE_PRIVATE)
+        val songJson = spf.getString("song_json", null)
+
+        if (songJson != null) {
+            val savedSong = Gson().fromJson(songJson, Song::class.java)
+
+            // SongActivity에서 마지막으로 재생하던 곡 id 기준으로 nowPos 맞추기
+            nowPos = getPlayingSongPosition(savedSong.id).coerceIn(0, songs.lastIndex)
+
+            // songs 리스트에 저장된 곡 정보도 최신 상태로 맞춤
+            songs[nowPos].title = savedSong.title
+            songs[nowPos].singer = savedSong.singer
+            songs[nowPos].coverImg = savedSong.coverImg
+            songs[nowPos].playTime = savedSong.playTime
+            songs[nowPos].second = savedSong.second
+            songs[nowPos].isPlaying = savedSong.isPlaying
+
+            isMiniPlaying = savedSong.isPlaying
+
+            bindMiniUI(songs[nowPos], songs[nowPos].second)
+            startMiniTimer(songs[nowPos].second, isMiniPlaying)
+            setMiniPlayIcon(isMiniPlaying)
+            return
+        }
+
+        // song_json이 없는 경우에만 기존 PlaybackStore / songId 로직 사용
         val st = PlaybackStore.read(this)
         if (st != null) {
+            //SongActivity/미니 플레이어에서 저장된 위치로부터 복원
             nowPos = getPlayingSongPosition(st.songId).coerceIn(0, songs.lastIndex)
             val sec = (st.posMs / 1000).coerceAtLeast(0)
             songs[nowPos].second = sec
             isMiniPlaying = st.isPlaying
         } else {
-            val spf = getSharedPreferences("song", MODE_PRIVATE)
+            // 기존 복원 로직 유지(이전에 재생되던 곡이 없으면)
             val songId = spf.getInt("songId", 0)
             nowPos = getPlayingSongPosition(songId).coerceIn(0, songs.lastIndex)
             isMiniPlaying = false
@@ -126,23 +159,26 @@ class MainActivity : AppCompatActivity() {
 //        }
 //    }
 
-
-
     override fun onStart() {
         super.onStart()
 
-        loadSongsFromFirebase()
-
         if (songs.isEmpty()) return
+
+        val spf = getSharedPreferences("song", MODE_PRIVATE)
+        val songJson = spf.getString("song_json", null)
 
         val st = PlaybackStore.read(this)
         if (st != null) {
+            //SongActivity/미니 플레이어에서 저장된 위치로부터 복원
             nowPos = getPlayingSongPosition(st.songId).coerceIn(0, songs.lastIndex)
             val sec = (st.posMs / 1000).coerceAtLeast(0)
             songs[nowPos].second = sec
             isMiniPlaying = st.isPlaying
+            bindMiniUI(songs[nowPos], sec)
+            startMiniTimer(sec, isMiniPlaying)
+            setMiniPlayIcon(isMiniPlaying)
         } else {
-            // 기존 복원 로직 유지
+            // 기존 복원 로직 유지(이전에 재생되던 곡이 없으면)
             val spf = getSharedPreferences("song", MODE_PRIVATE)
             val songId = spf.getInt("songId", 0)
             nowPos = getPlayingSongPosition(songId).coerceIn(0, songs.lastIndex)
@@ -151,20 +187,6 @@ class MainActivity : AppCompatActivity() {
 
         bindMiniUI(songs[nowPos], songs[nowPos].second)
         startMiniTimer(songs[nowPos].second, isMiniPlaying)
-        setMiniPlayIcon(isMiniPlaying)
-
-
-        // 마지막 듣던 곡 복원
-        val spf = getSharedPreferences("song", MODE_PRIVATE)
-        val songId = spf.getInt("songId", 0)
-        nowPos = getPlayingSongPosition(songId).coerceIn(0, songs.lastIndex)
-
-        // SongActivity에서 저장해둔 재생 위치 복원(있다면)
-        val savedSecond = songs[nowPos].second
-        isMiniPlaying = false // 메인에선 기본 STOP 상태로 시작
-
-        bindMiniUI(songs[nowPos], savedSecond)
-        startMiniTimer(savedSecond, isMiniPlaying)
         setMiniPlayIcon(isMiniPlaying)
     }
 
@@ -271,9 +293,6 @@ class MainActivity : AppCompatActivity() {
             if (isPlaying) R.drawable.btn_miniplay_pause   // play 아이콘
             else R.drawable.btn_miniplayer_play            // pause 아이콘
         )
-        // 접근성
-        binding.homeMiniPlayerPlay.contentDescription =
-            if (isPlaying) "Pause" else "Play"
     }
 
     // 진행률만 담당하는 미니 타이머
@@ -346,6 +365,13 @@ class MainActivity : AppCompatActivity() {
         if (playTime > 0) {
             cur.second = (percent * playTime) / 100
         }
+        val songJson = Gson().toJson(cur)
+        getSharedPreferences("song", MODE_PRIVATE)
+            .edit()
+            .putInt("songId", cur.id)
+            .putString("song_json", songJson)
+            .apply()
+
         startActivity(Intent(this, SongActivity::class.java))
     }
 
@@ -358,7 +384,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun updateMiniPlayer() {
         val spf = getSharedPreferences("song", MODE_PRIVATE)
-        val songJson = spf.getString("song_json", null)
+        val songJson = spf.getString("song_json", null)?:return
 
         if (songJson != null) {
             val song = Gson().fromJson(songJson, Song::class.java)
