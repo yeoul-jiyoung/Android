@@ -5,7 +5,12 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.myapplication.databinding.ActivityLoginBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 class LoginActivity : AppCompatActivity(){
     lateinit var binding:ActivityLoginBinding
 
@@ -24,44 +29,57 @@ class LoginActivity : AppCompatActivity(){
         }
     }
 
-    private fun login(){
-        if(binding.loginIdEt.text.toString().isEmpty()||binding.loginDirectInputEt.text.toString().isEmpty()){
-            Toast.makeText(this,"이메일을 입력해주세요.",Toast.LENGTH_SHORT).show()
+    private fun login() {
+        if (binding.loginIdEt.text.toString()
+                .isEmpty() || binding.loginDirectInputEt.text.toString().isEmpty()
+        ) {
+            Toast.makeText(this, "이메일을 입력해주세요.", Toast.LENGTH_SHORT).show()
             return
         }
-        if(binding.loginPasswordEt.text.toString().isEmpty()){
-            Toast.makeText(this,"비밀번호를 입력해주세요.",Toast.LENGTH_SHORT).show()
+        if (binding.loginPasswordEt.text.toString().isEmpty()) {
+            Toast.makeText(this, "비밀번호를 입력해주세요.", Toast.LENGTH_SHORT).show()
             return
         }
 
-        val email: String=binding.loginIdEt.text.toString()+"@"+binding.loginDirectInputEt.text.toString()
-        val pwd: String=binding.loginPasswordEt.text.toString()
+        val email: String =
+            binding.loginIdEt.text.toString() + "@" + binding.loginDirectInputEt.text.toString()
+        val pwd: String = binding.loginPasswordEt.text.toString()
 
-        val songDB=SongDatabase.getInstance(this)!!
-        val user=songDB.userDao().getUser(email,pwd)
+        //DB 작업은 IO 스러드에서 실행
+        lifecycleScope.launch(Dispatchers.IO) {
+            val songDB = SongDatabase.getInstance(this@LoginActivity)!!
+            val user = songDB.userDao().getUser(email, pwd)
 
-        user?.let{
-            Log.d("LOGIN_ACT/GET_USER","userId: ${user.id}, $user")
-            //유저의 아이디 값은 아래에서 만든 함수의 인자값
-            saveJwt(user.id)
-
-            //로그인 시 MainActivity로 이동
-            startMainActivity()
+            //UI 변경은 메인 스레드 에서 실행
+            withContext(Dispatchers.Main) {
+                if (user != null) { //user 정보가 null 이 아니면 (정보가 DB에 존재하면)
+                    Log.d("LOGIN_ACT/GET_USER", "userId: ${user.id}, $user")
+                    Toast.makeText(this@LoginActivity,"로그인에 성공하였습니다.",Toast.LENGTH_SHORT).show()
+                    saveJwt(user.id)
+                    startMainActivity()
+                    finish() // 로그인 화면으로 뒤로가기 막기
+                } else { //user 정보가 null 이면 (정보가 DB에 없으면)
+                    Toast.makeText(
+                        this@LoginActivity,
+                        "회원 정보가 존재하지 않습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
-        Toast.makeText(this,"회원 정보가 존개하지 않습니다.", Toast.LENGTH_SHORT).show()
     }
-    private fun saveJwt(jwt:Int){
-        val spf=getSharedPreferences("auth", MODE_PRIVATE)
-        val editor=spf.edit()
+                private fun saveJwt(jwt: Int) {
+                    val spf = getSharedPreferences("auth", MODE_PRIVATE)
+                    val editor = spf.edit()
 
-        //jwt를 키 값으로 저장
-        editor.putInt("jwt",jwt)
-        editor.apply()
-    }
+                    //jwt를 키 값으로 저장
+                    editor.putInt("jwt", jwt)
+                    editor.apply()
+                }
 
-    //MainActivity로 이동하는 함수
-    private fun startMainActivity(){
-        val intent=Intent(this, MainActivity::class.java)
-        startActivity(intent)
-    }
-}
+                //MainActivity로 이동하는 함수
+                private fun startMainActivity() {
+                    val intent = Intent(this, MainActivity::class.java)
+                    startActivity(intent)
+                }
+            }
