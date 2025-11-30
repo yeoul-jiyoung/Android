@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?> <shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval"> <solid android:color="#A9ABB0"/> <!-- 30% 투명도의 흰색 -->
+    <size android:width="6dp" android:height="6dp"/> </shape>
