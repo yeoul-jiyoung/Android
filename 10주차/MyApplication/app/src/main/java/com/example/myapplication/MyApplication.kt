@@ -47,10 +47,11 @@ class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // Kakao SDK 초기화 – strings.xml 에 kakao_native_app_key 넣어둠
         KakaoSdk.init(this, getString(R.string.kakao_native_app_key))
+
         // 현재 앱의 키 해시 로그로 출력
         val keyHash = Utility.getKeyHash(this)
         Log.d("KAKAO_KEY_HASH", "keyHash = $keyHash")
     }
 }
+
